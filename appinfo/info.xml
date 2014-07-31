@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<info>
+    <id>contactstofb</id>
+    <name>Contacts to FRITZ!Box</name>
+    <description>Sync your contacts from owncloud to your FRITZ!Box</description>
+    <licence>MIT</licence>
+    <author>Jan Thomas</author>
+    <version>0.0.1</version>
+    <requiremin>7</requiremin>
+</info>
