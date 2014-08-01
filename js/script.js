@@ -13,10 +13,31 @@
 
     App.prototype = {
         init: function() {
-            var that = this;
+            this.initSettings();
+        },
 
-            /* App-Settings */
+        initSettings: function() {
+            var that = this;
             var $settings = $('#app-settings');
+
+            $settings.find('#app-sync-now').on('click', function() {
+                var $elm = $(this);
+                var url = $elm.data('url');
+                var label = $elm.val();
+
+                $elm.attr('disabled', true).val($elm.data('synchronizing-label'));
+
+                $.ajax(url, {
+                    type: 'post'
+                }).done(function(data) {
+                    $elm.attr('disabled', false).val(label);
+
+                    console.log(data);
+                });
+
+
+            });
+
             $settings.find('#app-settings-header').on('click keydown', function(event) {
                 if(that.wrongKey(event)) {
                     return;

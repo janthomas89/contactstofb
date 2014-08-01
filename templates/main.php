@@ -23,21 +23,13 @@
                 <button class="settings-button" tabindex="0"></button>
             </div>
             <div id="app-settings-content">
-
                 <div>
-                    <h2>Settings</h2>
-                    <input type="text" name="url" placeholder="FRTZ!Box URL">
-                    <br>
-                    <input type="text" name="loginname" placeholder="Login name">
-                    <br>
-                    <input type="password" name="loginname" placeholder="Password">
-                    <br>
-                    <span>saved!</span>
+                    <input type="text" name="url" placeholder="FRTZ!Box URL" value="<? p($_['settings']['url']); ?>">
+                    <input type="text" name="loginname" placeholder="Login name" value="<? p($_['settings']['loginname']); ?>">
+                    <input type="password" name="loginname" placeholder="Password" value="<? p($_['settings']['password']); ?>">
                 </div>
-
                 <div>
-                    <h2>Actions</h2>
-                    <input type="button" value="Synchronize">
+                    <input type="button" value="Synchronize now" id="app-sync-now" data-synchronizing-label="synchronizing ..." data-url="<? p($_['synchronizeUrl']); ?>">
                 </div>
             </div>
         </div>

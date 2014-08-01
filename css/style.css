@@ -1,0 +1,9 @@
+#app-settings-content > div:first-child {
+    margin-bottom: 24px;
+}
+
+#app-sync-now,
+#app-settings-content > div [type='text'],
+#app-settings-content > div [type='password'] {
+    width: 100%;
+}

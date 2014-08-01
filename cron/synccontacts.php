@@ -17,6 +17,6 @@ class SyncContacts
     {
         $app = new Application();
         $container = $app->getContainer();
-        //$container->query('SyncService')->run();
+        $container->query('SyncService')->run();
     }
 }
