@@ -24,9 +24,10 @@
             </div>
             <div id="app-settings-content">
                 <div>
-                    <input type="text" name="url" placeholder="FRTZ!Box URL" value="<? p($_['settings']['url']); ?>">
-                    <input type="text" name="loginname" placeholder="Login name" value="<? p($_['settings']['loginname']); ?>">
-                    <input type="password" name="loginname" placeholder="Password" value="<? p($_['settings']['password']); ?>">
+                    <form id="app-settings-form" method="post" action="<? p($_['settingsUrl']); ?>">
+                        <input type="text" name="url" placeholder="FRTZ!Box URL" value="<? p($_['settings']['url']); ?>">
+                        <input type="password" name="password" placeholder="Password" value="<? p($_['settings']['password']); ?>">
+                    </form>
                 </div>
                 <div>
                     <input type="button" value="Synchronize now" id="app-sync-now" data-synchronizing-label="synchronizing ..." data-url="<? p($_['synchronizeUrl']); ?>">

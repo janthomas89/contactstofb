@@ -56,8 +56,8 @@ class PageController extends Controller
     }
 
     /**
+     * Index action.
      *
-     * @NoAdminRequired
      * @NoCSRFRequired
      */
     public function index()
@@ -66,15 +66,16 @@ class PageController extends Controller
         $route = 'contactstofb.page.synchronize';
         $synchronizeUrl = $this->urlGenerator->linkToRoute($route, array());
 
+        /* Link to settings api. */
+        $route = 'contactstofb.page.settings';
+        $settingsUrl = $this->urlGenerator->linkToRoute($route, array());
+
         /* Settings */
-        $settings = array(
-            'url' => 'fritz.box',
-            'loginname' => 'test123',
-            'password' => 'test123',
-        );
+        $settings = $this->settingsService->getSettingsArray();
 
         return new TemplateResponse('contactstofb', 'main', array(
             'synchronizeUrl' => $synchronizeUrl,
+            'settingsUrl' => $settingsUrl,
             'settings' => $settings,
         ));
     }
@@ -82,12 +83,20 @@ class PageController extends Controller
 
     /**
      * Synchronizes the contacts to FRITZ!Box.
-     *
-     * @NoAdminRequired
      */
     public function synchronize()
     {
         $result = $this->syncService->run();
         return $result;
+    }
+
+    /**
+     * Saves the settings.
+     */
+    public function settings($test)
+    {
+        $post = (array)$this->request->post;
+        $result = $this->settingsService->save($post);
+        return array('status' => $result ? 'success' : 'failure');
     }
 }

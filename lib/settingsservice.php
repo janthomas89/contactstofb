@@ -2,6 +2,9 @@
 
 namespace OCA\ContactsToFb\Lib;
 
+use \OCP\IConfig;
+use \OCA\Encryption\Crypt;
+
 /**
  * Service for providing and manipulating the settings.
  *
@@ -11,6 +14,16 @@ namespace OCA\ContactsToFb\Lib;
  */
 class SettingsService
 {
+    /**
+     * @var IConfig
+     */
+    protected $config;
+
+    /**
+     * @var string
+     */
+    protected $appName;
+
     /**
      * The FRITZ!Box url.
      *
@@ -26,22 +39,59 @@ class SettingsService
     protected $password;
 
 
-    public function __construct()
+    public function __construct(IConfig $config, $appName)
     {
-        /**
-         * @todo complete implementation!
-         */
+        $this->config = $config;
+        $this->appName = $appName;
 
-        $this->setPassword('test123');
-        $this->setUrl('fritz.box');
+        $this->load();
     }
 
+    /**
+     * Returns the settings as an array.
+     *
+     * @return array
+     */
     public function getSettingsArray()
     {
         return array(
             'url' => $this->getUrl(),
             'password' => $this->getPassword(),
         );
+    }
+
+    /**
+     * Loads and decrypts the settings.
+     */
+    public function load()
+    {
+        $appName = $this->appName;
+
+        $this->setUrl($this->config->getAppValue($appName, 'url'));
+
+        $pwEnc = $this->config->getAppValue($appName, 'password');
+        $this->setPassword($password = Crypt::symmetricDecryptFileContent($pwEnc, ''));
+    }
+
+    /**
+     * Saves the settings giveen as an array.
+     *
+     * @param array $settings
+     */
+    public function save(array $settings)
+    {
+        $appName = $this->appName;
+
+        if (isset($settings['url'])) {
+            $this->config->setAppValue($appName, 'url', $settings['url']);
+        }
+
+        if (isset($settings['password'])) {
+            $password = Crypt::symmetricEncryptFileContent($settings['password'], '');
+            $this->config->setAppValue($appName, 'password', $password);
+        }
+
+        return true;
     }
 
     /**

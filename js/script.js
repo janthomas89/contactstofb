@@ -19,6 +19,22 @@
         initSettings: function() {
             var that = this;
             var $settings = $('#app-settings');
+            var $form = $settings.find('#app-settings-form');
+
+            $form.on('submit', function(e) {
+                e.preventDefault();
+                $.ajax({
+                    type: $form.attr('method'),
+                    url: $form.attr('action'),
+                    data: $form.serialize()
+                }).always(function(data) {
+                    if (!data.status || data.status != 'success') {
+                        alert(data.msg || 'an error occurred while saving the settings');
+                    }
+                });
+            }).find('input').change(function() {
+                $form.submit();
+            });
 
             $settings.find('#app-sync-now').on('click', function() {
                 var $elm = $(this);
@@ -28,14 +44,16 @@
                 $elm.attr('disabled', true).val($elm.data('synchronizing-label'));
 
                 $.ajax(url, {
-                    type: 'post'
-                }).done(function(data) {
+                    type: 'post',
+                    data: {
+                        requesttoken: $elm.data('token')
+                    }
+                }).always(function(data) {
                     $elm.attr('disabled', false).val(label);
-
-                    console.log(data);
+                    if (!data.status || data.status != 'success') {
+                        alert(data.msg || 'an error occurred while syncing the contacts');
+                    }
                 });
-
-
             });
 
             $settings.find('#app-settings-header').on('click keydown', function(event) {

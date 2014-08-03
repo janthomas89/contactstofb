@@ -8,6 +8,7 @@ use \OCA\ContactsToFb\Lib\SettingsService;
 use \OCA\ContactsToFb\Lib\SyncService;
 
 require_once(dirname(__FILE__) . '/../vendor/fritzbox_api_php/lib/fritzbox_api.class.php');
+require_once dirname(__FILE__) . '/../../files_encryption/lib/crypt.php';
 
 /**
  * The application definition.
@@ -37,7 +38,10 @@ class Application extends App
 
         /* Other services ... */
         $container->registerService('SettingsService', function($c) {
-            return new SettingsService();
+            return new SettingsService(
+                $c->query('ServerContainer')->getConfig(),
+                $c->query('AppName')
+            );
         });
         $container->registerService('SyncService', function($c) {
             return new SyncService(
