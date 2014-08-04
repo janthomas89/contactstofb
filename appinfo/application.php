@@ -6,6 +6,7 @@ use \OCP\AppFramework\App;
 use \OCA\ContactsToFb\Controller\PageController;
 use \OCA\ContactsToFb\Lib\SettingsService;
 use \OCA\ContactsToFb\Lib\SyncService;
+use \OCA\ContactsToFb\Lib\LogService;
 
 require_once(dirname(__FILE__) . '/../vendor/fritzbox_api_php/lib/fritzbox_api.class.php');
 require_once dirname(__FILE__) . '/../../files_encryption/lib/crypt.php';
@@ -32,7 +33,8 @@ class Application extends App
                 $c->query('Request'),
                 $c->query('ServerContainer')->getURLGenerator(),
                 $c->query('SettingsService'),
-                $c->query('SyncService')
+                $c->query('SyncService'),
+                $c->query('LogService')
             );
         });
 
@@ -45,7 +47,13 @@ class Application extends App
         });
         $container->registerService('SyncService', function($c) {
             return new SyncService(
-                $c->query('SettingsService')
+                $c->query('SettingsService'),
+                $c->query('LogService')
+            );
+        });
+        $container->registerService('LogService', function($c) {
+            return new LogService(
+                $c->query('ServerContainer')->getDb()
             );
         });
     }

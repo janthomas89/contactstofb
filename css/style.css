@@ -1,9 +1,17 @@
-#app-settings-content > div:first-child {
+#app-navigation > div {
+    margin: 6px;
+}
+
+#app-navigation > div > h2 {
+    font-weight: bold;
+}
+
+#app-navigation > div:first-child {
     margin-bottom: 24px;
 }
 
 #app-sync-now,
-#app-settings-content > div [type='text'],
-#app-settings-content > div [type='password'] {
+#app-navigation > div [type='text'],
+#app-navigation > div [type='password'] {
     width: 100%;
 }

@@ -8,6 +8,7 @@ use \OCP\IRequest;
 use \OCP\IURLGenerator;
 use \OCA\ContactsToFb\Lib\SettingsService;
 use \OCA\ContactsToFb\Lib\SyncService;
+use \OCA\ContactsToFb\Lib\LogService;
 
 /**
  * Page controller of the application.
@@ -34,6 +35,12 @@ class PageController extends Controller
     protected $syncService;
 
     /**
+     *
+     * @var LogService
+     */
+    protected $logService;
+
+    /**
      * Constructor of PageController.
      *
      * @param type $appName
@@ -47,12 +54,14 @@ class PageController extends Controller
             IRequest $request,
             IURLGenerator $urlGenerator,
             SettingsService $settingsService,
-            SyncService $syncService
+            SyncService $syncService,
+            LogService $logService
     ) {
         parent::__construct($appName, $request);
         $this->urlGenerator = $urlGenerator;
         $this->settingsService = $settingsService;
         $this->syncService = $syncService;
+        $this->logService = $logService;
     }
 
     /**
@@ -73,10 +82,14 @@ class PageController extends Controller
         /* Settings */
         $settings = $this->settingsService->getSettingsArray();
 
+        /* First page of Log entries. */
+        $logEntries = $this->logService->getPage(1);
+
         return new TemplateResponse('contactstofb', 'main', array(
             'synchronizeUrl' => $synchronizeUrl,
             'settingsUrl' => $settingsUrl,
             'settings' => $settings,
+            'logEntries' => $logEntries,
         ));
     }
 

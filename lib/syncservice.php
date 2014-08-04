@@ -19,13 +19,21 @@ class SyncService
     protected $settingsService;
 
     /**
+     * @var LogService
+     */
+    protected $logService;
+
+    /**
      * Constructor of the SyncService.
      *
      * @param fritzbox_api $api
      */
-    public function __construct(SettingsService $settingsService)
-    {
+    public function __construct(
+        SettingsService $settingsService,
+        LogService $logService
+    ) {
         $this->settingsService = $settingsService;
+        $this->logService = $logService;
     }
 
     /**

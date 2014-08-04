@@ -18,8 +18,8 @@
 
         initSettings: function() {
             var that = this;
-            var $settings = $('#app-settings');
-            var $form = $settings.find('#app-settings-form');
+            var $navigation = $('#app-navigation');
+            var $form = $navigation.find('#app-settings-form');
 
             $form.on('submit', function(e) {
                 e.preventDefault();
@@ -36,7 +36,7 @@
                 $form.submit();
             });
 
-            $settings.find('#app-sync-now').on('click', function() {
+            $navigation.find('#app-sync-now').on('click', function() {
                 var $elm = $(this);
                 var url = $elm.data('url');
                 var label = $elm.val();
@@ -55,30 +55,6 @@
                     }
                 });
             });
-
-            $settings.find('#app-settings-header').on('click keydown', function(event) {
-                if(that.wrongKey(event)) {
-                    return;
-                }
-
-                var bodyListener = function(e) {
-                    if($settings.find($(e.target)).length === 0) {
-                        $settings.switchClass('open', '');
-                    }
-                };
-                if($settings.hasClass('open')) {
-                    $settings.switchClass('open', '');
-                    $('body').unbind('click', bodyListener);
-                } else {
-                    $settings.switchClass('', 'open');
-                    $('body').bind('click', bodyListener);
-                }
-            });
-        },
-
-        wrongKey: function(event) {
-            return ((event.type === 'keydown' || event.type === 'keypress')
-                    && (event.keyCode !== 32 && event.keyCode !== 13));
         }
     };
 
