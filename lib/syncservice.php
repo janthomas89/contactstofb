@@ -2,6 +2,8 @@
 
 namespace OCA\ContactsToFb\Lib;
 
+use  \OpenCloud\Common\Log\Logger;
+
 /**
  * Service for syncing the contacts.
  *
@@ -24,31 +26,57 @@ class SyncService
     protected $logService;
 
     /**
+     * @var LogEntry
+     */
+    protected $logEntry;
+
+    /**
+     * @var Logger
+     */
+    protected $logger;
+
+    /**
+     * @var string The apps name
+     */
+    protected $appName;
+
+    /**
      * Constructor of the SyncService.
      *
-     * @param fritzbox_api $api
+     * @param SettingsService $settingsService
+     * @param LogService $logService
+     * @param Logger $logger The OC Logger
+     * @param string $appName
      */
     public function __construct(
         SettingsService $settingsService,
-        LogService $logService
+        LogService $logService,
+        Logger $logger,
+        $appName
     ) {
         $this->settingsService = $settingsService;
         $this->logService = $logService;
+        $this->logger = $logger;
+        $this->appName = $appName;
     }
 
     /**
      * Runs the synchronization process.
      *
+     * @param boolean $manually
      * @return array
      */
-    public function run()
+    public function run($manually = false)
     {
         $result = array('status' => 'success');
 
+        $this->initLogEntry($manually);
 
-        /**
-         * @todo Only sync, when new contacts are available
-         */
+        if (!$manually) {
+            /**
+             * @todo Only sync, when new contacts are available
+             */
+        }
 
         try {
             /* Try to upload the contacts */
@@ -63,15 +91,30 @@ class SyncService
             // Another service? => Read all Contacts!
 
         } catch (\Exception $e) {
-            /**
-             * @todo Log error!
-             */
+            $this->logEntry->setStatus(LogEntry::STATUS_FAILED);
+            $this->logger->error($e->getMessage(), array('app' => $this->appName));
 
             $result['status'] = 'failure';
             $result['msg'] = $e->getMessage();
         }
 
+        $this->logService->insert($this->logEntry);
+
         return $result;
+    }
+
+    /**
+     * Initializes the log entry.
+     *
+     * @param boolean $manually
+     */
+    protected function initLogEntry($manually)
+    {
+        $now = new \DateTime();
+        $this->logEntry = new LogEntry();
+        $this->logEntry->setIsManually($manually);
+        $this->logEntry->setDate($now->format('Y-m-d H:i:s'));
+        $this->logEntry->setStatus(LogEntry::STATUS_SUCCESS);
     }
 
     /**
@@ -97,6 +140,9 @@ class SyncService
         $writer->startElement('phonebook');
 
         $contacts = \OCP\Contacts::search('', array('TEL'));
+
+        $this->logEntry->setSynceditems(count($contacts));
+
         foreach ($contacts as $contact) {
             $writer->startElement('contact');
             $writer->writeElement('category', 0);

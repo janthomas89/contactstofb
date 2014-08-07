@@ -48,13 +48,17 @@ class Application extends App
         $container->registerService('SyncService', function($c) {
             return new SyncService(
                 $c->query('SettingsService'),
-                $c->query('LogService')
+                $c->query('LogService'),
+                $c->query('Logger')
             );
         });
         $container->registerService('LogService', function($c) {
             return new LogService(
                 $c->query('ServerContainer')->getDb()
             );
+        });
+        $container->registerService('Logger', function($c) {
+            return $c->query('ServerContainer')->getLogger();
         });
     }
 }

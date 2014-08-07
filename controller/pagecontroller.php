@@ -99,7 +99,7 @@ class PageController extends Controller
      */
     public function synchronize()
     {
-        $result = $this->syncService->run();
+        $result = $this->syncService->run(true);
         return $result;
     }
 
