@@ -18,6 +18,7 @@ class LogEntry extends Entity
 
     const STATUS_SUCCESS = 'success';
     const STATUS_FAILED = 'failed';
+    const STATUS_SKIPPED = 'skipped';
 
     /**
      * Type of the synchronization (manually, cron)

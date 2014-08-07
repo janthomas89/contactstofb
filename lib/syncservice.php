@@ -76,6 +76,7 @@ class SyncService
             /**
              * @todo Only sync, when new contacts are available
              */
+            $this->logEntry->setStatus(LogEntry::STATUS_SKIPPED);
         }
 
         try {
