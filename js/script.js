@@ -52,6 +52,8 @@
                     $elm.attr('disabled', false).val(label);
                     if (!data.status || data.status != 'success') {
                         alert(data.msg || 'an error occurred while syncing the contacts');
+                    } else {
+                        location.reload();
                     }
                 });
             });

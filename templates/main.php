@@ -21,6 +21,7 @@
 
     </div>
     <div id="app-content">
+        <!--
         <div>
             <h1>ToDos</h1>
             <ul>
@@ -32,16 +33,38 @@
                 <li>Improve UI / ...</li>
             </ul>
         </div>
+        -->
 
-        <pre>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Synced items</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="fileList">
 
-        <? foreach ($_['logEntries'] as $entry) { ?>
+                <? foreach ($_['logEntries'] as $entry) { ?>
+                    <tr>
+                        <td>
+                            <? p($entry->getDate()) ?>
+                        </td>
+                        <td>
+                            <? p($entry->getType()) ?>
+                        </td>
+                        <td>
+                            <? p($entry->getSynceditems()) ?>
+                        </td>
+                        <td>
+                            <? p($entry->getStatus()) ?>
+                        </td>
+                    </tr>
+                <? }  ?>
 
-            <? var_dump($entry) ?>
-
-        <? }  ?>
-
-        </pre>
+            </tbody>
+        </table>
 
     </div>
 </div>
