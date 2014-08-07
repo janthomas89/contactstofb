@@ -2,7 +2,7 @@
 
 namespace OCA\ContactsToFb\Cron;
 
-use OCA\ContactsToFb\Application;
+use OCA\ContactsToFb\AppInfo\Application;
 
 /**
  * Cronjob for syncing the contacts.

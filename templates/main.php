@@ -33,8 +33,15 @@
             </ul>
         </div>
 
+        <pre>
 
-        <? var_export($_['logEntries']);  ?>
+        <? foreach ($_['logEntries'] as $entry) { ?>
+
+            <? var_dump($entry) ?>
+
+        <? }  ?>
+
+        </pre>
 
     </div>
 </div>
