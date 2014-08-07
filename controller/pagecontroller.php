@@ -106,7 +106,7 @@ class PageController extends Controller
     /**
      * Saves the settings.
      */
-    public function settings($test)
+    public function settings()
     {
         $post = (array)$this->request->post;
         $result = $this->settingsService->save($post);
