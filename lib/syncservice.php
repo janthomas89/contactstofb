@@ -165,6 +165,10 @@ class SyncService
             foreach ($contact['TEL'] as $number) {
                 $isMobile = $this->isMobileNumber($number);
 
+                /**
+                 * @todo Improve home, mobile, etc.!
+                 */
+
                 $type = $isMobile ? 'mobile' : 'home';
                 $name = $contact['FN'] . ($isMobile ? ' (mobile)' : '');
 
