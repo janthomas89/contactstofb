@@ -14,6 +14,7 @@
     App.prototype = {
         init: function() {
             this.initSettings();
+            this.initListView();
         },
 
         initSettings: function() {
@@ -57,6 +58,22 @@
                     }
                 });
             });
+        },
+
+        initListView: function() {
+            $('#app-content table').stickyTableHeaders({
+                scrollableArea: $('#app-content')
+            });
+
+            /*
+            var $table = $('#app-content table');
+
+            $table.find('thead th').each(function(i) {
+                $table.find('tbody tr td:eq(' + i + ')').width($(this).width());
+            });
+
+            $table.find('tbody').width('100%');
+            */
         }
     };
 

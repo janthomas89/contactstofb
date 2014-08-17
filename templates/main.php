@@ -1,4 +1,5 @@
 <?php
+\OCP\Util::addScript('contactstofb', 'jquery.stickytableheaders.min');
 \OCP\Util::addScript('contactstofb', 'script');
 \OCP\Util::addStyle('contactstofb', 'style');
 

@@ -18,7 +18,7 @@ class LogService extends Mapper
     /**
      * Limit Log entries.
      */
-    const LIMIT = 20;
+    const LIMIT = 128;
 
     public function __construct(IDb $db)
     {
