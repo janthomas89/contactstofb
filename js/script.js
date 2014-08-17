@@ -21,20 +21,22 @@
             var that = this;
             var $navigation = $('#app-navigation');
             var $form = $navigation.find('#app-settings-form');
+            var $submit = $form.find('input[type=submit]');
+            var submitLabel = $submit.val();
 
             $form.on('submit', function(e) {
                 e.preventDefault();
+                $submit.attr('disabled', true).val($submit.data('saving-label'));
                 $.ajax({
                     type: $form.attr('method'),
                     url: $form.attr('action'),
                     data: $form.serialize()
                 }).always(function(data) {
+                    $submit.attr('disabled', false).val(submitLabel);
                     if (!data.status || data.status != 'success') {
                         alert(data.msg || 'an error occurred while saving the settings');
                     }
                 });
-            }).find('input').change(function() {
-                $form.submit();
             });
 
             $navigation.find('#app-sync-now').on('click', function() {

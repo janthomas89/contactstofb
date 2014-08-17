@@ -4,6 +4,7 @@ namespace OCA\ContactsToFb\Lib;
 
 use \OCP\IConfig;
 use \OCA\Encryption\Crypt;
+use \OCA\Contacts\App as ContactsApp;
 
 /**
  * Service for providing and manipulating the settings.
@@ -32,11 +33,25 @@ class SettingsService
     protected $url;
 
     /**
+     * The FRITZ!Box user.
+     *
+     * @var string
+     */
+    protected $user;
+
+    /**
      * The FRITZ!Box password.
      *
      * @var string
      */
     protected $password;
+
+    /**
+     * ID of the addressbook to sync.
+     *
+     * @var string
+     */
+    protected $addressbook;
 
 
     public function __construct(IConfig $config, $appName)
@@ -56,7 +71,9 @@ class SettingsService
     {
         return array(
             'url' => $this->getUrl(),
+            'user' => $this->getUser(),
             'password' => $this->getPassword(),
+            'addressbook' => $this->getAddressbook(),
         );
     }
 
@@ -69,8 +86,16 @@ class SettingsService
 
         $this->setUrl($this->config->getAppValue($appName, 'url'));
 
+        $this->setUser($this->config->getAppValue($appName, 'user'));
+
+        $password = '';
         $pwEnc = $this->config->getAppValue($appName, 'password');
-        $this->setPassword($password = Crypt::symmetricDecryptFileContent($pwEnc, ''));
+        if ($pwEnc != '') {
+            $password = Crypt::symmetricDecryptFileContent($pwEnc, '');
+        }
+        $this->setPassword($password);
+
+        $this->setAddressbook($this->config->getAppValue($appName, 'addressbook'));
     }
 
     /**
@@ -86,9 +111,17 @@ class SettingsService
             $this->config->setAppValue($appName, 'url', $settings['url']);
         }
 
+        if (isset($settings['user'])) {
+            $this->config->setAppValue($appName, 'user', $settings['user']);
+        }
+
         if (isset($settings['password'])) {
             $password = Crypt::symmetricEncryptFileContent($settings['password'], '');
             $this->config->setAppValue($appName, 'password', $password);
+        }
+
+        if (isset($settings['addressbook'])) {
+            $this->config->setAppValue($appName, 'addressbook', $settings['addressbook']);
         }
 
         return true;
@@ -115,6 +148,26 @@ class SettingsService
     }
 
     /**
+     * Returns the user.
+     *
+     * @return string
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * Sets the user.
+     *
+     * @param string $user
+     */
+    public function setUser($user)
+    {
+        $this->user = $user;
+    }
+
+    /**
      * Returns the password.
      *
      * @return string
@@ -132,5 +185,43 @@ class SettingsService
     public function setPassword($password)
     {
         $this->password = $password;
+    }
+
+    /**
+     * Returns the ID of the addressbook.
+     *
+     * @return string
+     */
+    public function getAddressbook()
+    {
+        return $this->addressbook;
+    }
+
+    /**
+     * Sets the ID of the addressbook.
+     *
+     * @param string $addressbook
+     */
+    public function setAddressbook($addressbook)
+    {
+        $this->addressbook = $addressbook;
+    }
+
+    /**
+     * Returns the Addressbok which should be synced.
+     *
+     * @return \OCA\Contacts\Addressbook
+     */
+    public function getAddressBookInstance()
+    {
+        $parts = explode(':', $this->getAddressbook());
+
+        $backendName = isset($parts[0]) ? $parts[0] : '';
+        $addressBookId = isset($parts[1]) ? $parts[1] : '';
+
+        $contactsApp = new ContactsApp();
+        $addressBook = $contactsApp->getAddressBook($backendName, $addressBookId);
+
+        return $addressBook;
     }
 }

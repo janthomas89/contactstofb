@@ -12,16 +12,19 @@
 
 #app-sync-now,
 #app-navigation > div [type='text'],
-#app-navigation > div [type='password'] {
+#app-navigation > div [type='password'],
+#app-navigation > div [type='submit'],
+#app-navigation > div select {
     width: 100%;
 }
 
+#app-navigation  form > div {
+    margin-top: 10px;
+}
 
 #app-content table {
     width: 100%;
 }
-
-
 
 #app-content table th,
 #app-contenttable td {

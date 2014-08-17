@@ -55,4 +55,22 @@ class LogService extends Mapper
         $sql = 'SELECT * FROM `*PREFIX*contactstofb_log` ORDER BY id DESC';
         return $this->findEntities($sql, array(), self::LIMIT, (int)$offset);
     }
+
+    /**
+     * Returns the date of the last log entry.
+     *
+     * @return int
+     */
+    public function getLastLogDate()
+    {
+        $sql = 'SELECT date FROM `*PREFIX*contactstofb_log` ORDER BY id DESC';
+        $entries = $this->findEntities($sql, array(), 1, 1);
+
+        if (isset($entries[0])) {
+            return strtotime($entries[0]->getDate());
+        }
+
+        return 0;
+    }
+
 }

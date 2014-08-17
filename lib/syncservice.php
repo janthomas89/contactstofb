@@ -2,7 +2,9 @@
 
 namespace OCA\ContactsToFb\Lib;
 
-use  \OpenCloud\Common\Log\Logger;
+use \OpenCloud\Common\Log\Logger;
+use \libphonenumber\PhoneNumberUtil;
+use \libphonenumber\PhoneNumberType;
 
 /**
  * Service for syncing the contacts.
@@ -26,6 +28,11 @@ class SyncService
     protected $logService;
 
     /**
+     * @var OC\Files\Node\Folder
+     */
+    protected $appStorage;
+
+    /**
      * @var LogEntry
      */
     protected $logEntry;
@@ -41,6 +48,13 @@ class SyncService
     protected $appName;
 
     /**
+     * Addressbook which should be synced.
+     *
+     * @var \OCA\Contacts\Addressbook
+     */
+    protected $addressBook;
+
+    /**
      * Constructor of the SyncService.
      *
      * @param SettingsService $settingsService
@@ -51,11 +65,13 @@ class SyncService
     public function __construct(
         SettingsService $settingsService,
         LogService $logService,
+        OC\Files\Node\Folder $appStorage,
         Logger $logger,
         $appName
     ) {
         $this->settingsService = $settingsService;
         $this->logService = $logService;
+        $this->appStorage = $appStorage;
         $this->logger = $logger;
         $this->appName = $appName;
     }
@@ -71,25 +87,30 @@ class SyncService
         $result = array('status' => 'success');
 
         $this->initLogEntry($manually);
+        $this->loadAddressBook();
 
-        if (!$manually) {
-            /**
-             * @todo Only sync, when new contacts are available
-             */
+        /* Only sync, when new/modified contacts are available. */
+        if (!$manually
+            && $this->addressBook->lastModified() < $this->logService->getLastLogDate()
+        ) {
             $this->logEntry->setStatus(LogEntry::STATUS_SKIPPED);
+            $this->logService->insert($this->logEntry);
+
+            $result['msg'] = 'skipped';
+            return $result;
         }
 
+        /* Try to upload the contacts */
         try {
-            /* Try to upload the contacts */
-            $tmpContactsFile = $this->getContactsXMLPath();
-            $this->getApi()->doPostFile(array(
-                'PhonebookId' => self::PHONE_BOOK_ID,
-                'PhonebookImportFile' => '@' . $tmpContactsFile . ';type=text/xml'
+            $xml = $this->getAddressBookXML();
+
+            $postFields = array('PhonebookId' => self::PHONE_BOOK_ID);
+            $fileFields = array('PhonebookImportFile' => array(
+                'filename' => 'addressbook.xml',
+                'type' => 'text/xml',
+                'content' => $xml,
             ));
-
-            // Upload some contacts
-
-            // Another service? => Read all Contacts!
+            $this->getApi()->doPostFile($postFields, $fileFields);
 
         } catch (\Exception $e) {
             $this->logEntry->setStatus(LogEntry::STATUS_FAILED);
@@ -119,87 +140,60 @@ class SyncService
     }
 
     /**
-     * Generates the XML file for contact upload.
+     * Loads the addressbook which should be synced.
+     */
+    protected function loadAddressBook()
+    {
+        $this->addressBook = $this->settingsService->getAddressBookInstance();
+        \OCP\Contacts::clear();
+        \OCP\Contacts::registerAddressBook(
+            $this->addressBook->getSearchProvider()
+        );
+    }
+
+    /**
+     * Generates the XML for contact upload.
      *
      * @return string
      */
-    protected function getContactsXMLPath()
+    protected function getAddressBookXML()
     {
-        /**
-         * @todo Generate XML dynamically
-         * @see http://doc.owncloud.org/server/7.0/developer_manual/app/filesystem.html
-         */
-
-        $file = dirname(__FILE__) . '/../../../data/root/files/TelefonbuchTest.xml';
-
-        $writer = new \XMLWriter();
-        $writer->openURI($file);
-
-        $writer->startDocument('1.0', 'iso-8859-1');
-        $writer->setIndent(4);
-        $writer->startElement('phonebooks');
-        $writer->startElement('phonebook');
+        $xml = new AddressBookXML();
 
         $contacts = \OCP\Contacts::search('', array('TEL'));
-
-        $this->logEntry->setSynceditems(count($contacts));
-
         foreach ($contacts as $contact) {
-            $writer->startElement('contact');
-            $writer->writeElement('category', 0);
-            $writer->writeElement('id', $contact['id']);
+            foreach ($contact['TEL'] as $number) {
+                $isMobile = $this->isMobileNumber($number);
 
-            $writer->startElement('person');
-            $writer->writeElement('realName', $contact['FN']);
-            $writer->endElement();
+                $type = $isMobile ? 'mobile' : 'home';
+                $name = $contact['FN'] . ($isMobile ? ' (mobile)' : '');
 
-            $writer->startElement('telephony');
-            $writer->writeAttribute('nid', 3);
-            foreach ($contact['TEL'] as $key => $tel) {
-                if ($key > 0) {
-                    break;
-                }
-
-                $writer->startElement('number');
-                $writer->writeAttribute('type', 'home');
-                $writer->writeAttribute('id', $key);
-                $writer->writeRaw($tel);
-                $writer->endElement();
+                $xml->writeContact($contact['id'], $name, $number, $type);
+                $this->logEntry->incSyncedItems();
             }
-
-            $writer->endElement();
-
-
-            //var_export($contact);
-
-            /*
-            <contact modified="0">
-
-        <services nid="1">
-            <email id="0" />
-        </services>
-        <telephony nid="3">
-            <number type="home" id="0" vanity="" prio="1">02408959432</number>
-            <number type="mobile" id="1" prio="0" />
-            <number type="work" id="2" prio="0" />
-        </telephony>
-        <services />
-        <setup />
-        <mod_time>1361899612</mod_time>
-        <uniqueid>18</uniqueid>
-    </contact>
-             */
-
-            $writer->endElement();
         }
 
-        $writer->endElement();
-        $writer->endElement();
-        $writer->endDocument();
+        return $xml->toString();
+    }
 
-        $writer->flush();
+    /**
+     * Checks, if the given number is a mobile number.
+     *
+     * @param string $number
+     * @return boolean
+     */
+    protected function isMobileNumber($number)
+    {
+        $phoneUtil = PhoneNumberUtil::getInstance();
+        try {
+            $numberInstance = $phoneUtil->parse($number, 'DE');
+            $type = $phoneUtil->getNumberType($numberInstance);
+            return PhoneNumberType::MOBILE === $type;
+        } catch (\libphonenumber\NumberParseException $e) {
+            $this->logger->error($e->getMessage(), array('app' => $this->appName));
+        }
 
-        return $file;
+        return false;
     }
 
     /**
@@ -209,6 +203,12 @@ class SyncService
      */
     protected function getApi()
     {
+
+        /**
+         * @todo Immplement own API
+         * @todo Set fritzbox user from settings
+         */
+
         return new \fritzbox_api(
             $this->settingsService->getPassword(),
             $this->settingsService->getUrl()

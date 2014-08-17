@@ -90,6 +90,7 @@ class PageController extends Controller
             'settingsUrl' => $settingsUrl,
             'settings' => $settings,
             'logEntries' => $logEntries,
+            'addressBooks' => \OCP\Contacts::getAddressBooks(),
         ));
     }
 

@@ -8,7 +8,7 @@ use \OCA\ContactsToFb\Lib\SettingsService;
 use \OCA\ContactsToFb\Lib\SyncService;
 use \OCA\ContactsToFb\Lib\LogService;
 
-require_once(dirname(__FILE__) . '/../vendor/fritzbox_api_php/lib/fritzbox_api.class.php');
+require_once dirname(__FILE__) . '/../vendor/fritzbox_api_php/lib/fritzbox_api.class.php';
 require_once dirname(__FILE__) . '/../../files_encryption/lib/crypt.php';
 
 /**
@@ -23,6 +23,9 @@ class Application extends App
     public function __construct (array $urlParams = array())
     {
         parent::__construct('contactstofb', $urlParams);
+
+        /* Autoloading vendor components. */
+        $this->initAutoloading();
 
         $container = $this->getContainer();
 
@@ -49,7 +52,9 @@ class Application extends App
             return new SyncService(
                 $c->query('SettingsService'),
                 $c->query('LogService'),
-                $c->query('Logger')
+                $c->query('AppStorage'),
+                $c->query('Logger'),
+                $c->query('AppName')
             );
         });
         $container->registerService('LogService', function($c) {
@@ -60,5 +65,18 @@ class Application extends App
         $container->registerService('Logger', function($c) {
             return $c->query('ServerContainer')->getLogger();
         });
+        $container->registerService('AppStorage', function($c) {
+            return $c->query('ServerContainer')->getAppFolder();
+        });
+    }
+
+    /**
+     * Initializes the autoloading of the vendor components.
+     */
+    protected function initAutoloading()
+    {
+        $loader = new \Composer\Autoload\ClassLoader();
+        $loader->add('libphonenumber', dirname(__FILE__) . '/../vendor/libphonenumber-for-php/src/');
+        $loader->register();
     }
 }

@@ -39,7 +39,7 @@ class LogEntry extends Entity
      *
      * @var int
      */
-    protected $synceditems;
+    protected $synceditems = 0;
 
     /**
      * Status of the synchronization (success, failed).
@@ -64,5 +64,15 @@ class LogEntry extends Entity
     public function setIsManually($manually)
     {
         $this->setType($manually ? self::TYPE_MANUALLY : self::TYPE_CRON);
+    }
+
+    /**
+     * Increments the number of synced items.
+     *
+     * @param int $incrementBy
+     */
+    public function incSyncedItems($incrementBy = 1)
+    {
+        $this->setSynceditems($this->getSynceditems() + $incrementBy);
     }
 }

@@ -10,8 +10,27 @@
         <div class="container">
             <h2>Settings</h2>
             <form id="app-settings-form" method="post" action="<? p($_['settingsUrl']); ?>">
-                <input type="text" name="url" placeholder="FRTZ!Box URL" value="<? p($_['settings']['url']); ?>">
-                <input type="password" name="password" placeholder="Password" value="<? p($_['settings']['password']); ?>">
+                <div>
+                    <label for="app-settings-form-url">FRTZ!Box Settings</label>
+                    <input type="text" name="url" id="app-settings-form-url" placeholder="FRTZ!Box URL" value="<? p($_['settings']['url']); ?>">
+                    <input type="text" name="user" placeholder="User (optional)" value="<? p($_['settings']['user']); ?>">
+                    <input type="password" name="password" placeholder="Password" value="<? p($_['settings']['password']); ?>">
+                </div>
+
+                <div>
+                    <label for="app-settings-form-addressbook">Addressbook</label>
+                    <select name="addressbook" id="app-settings-form-addressbook">
+                        <? foreach ($_['addressBooks'] as $id => $name) { ?>
+                            <option value="<? p($id) ?>"<? if($_['settings']['addressbook'] == $id) {p(' selected');} ?>>
+                                <? p($name) ?> (<? p($id) ?>)
+                            </option>
+                        <? }  ?>
+                    </select>
+                </div>
+
+                <div>
+                    <input type="submit" value="Save" data-saving-label="saving ...">
+                </div>
             </form>
         </div>
 
