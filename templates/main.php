@@ -69,7 +69,8 @@
                 <? foreach ($_['logEntries'] as $entry) { ?>
                     <tr>
                         <td>
-                            <? p($entry->getDate()) ?>
+                            <? p($l->l('date', $entry->getDate()));?>
+                            <? p($l->l('time', $entry->getDate()));?>
                         </td>
                         <td>
                             <? p($entry->getType()) ?>

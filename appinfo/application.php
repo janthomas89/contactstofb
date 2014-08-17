@@ -8,9 +8,6 @@ use \OCA\ContactsToFb\Lib\SettingsService;
 use \OCA\ContactsToFb\Lib\SyncService;
 use \OCA\ContactsToFb\Lib\LogService;
 
-require_once dirname(__FILE__) . '/../vendor/fritzbox_api_php/lib/fritzbox_api.class.php';
-require_once dirname(__FILE__) . '/../../files_encryption/lib/crypt.php';
-
 /**
  * The application definition.
  *
@@ -77,6 +74,11 @@ class Application extends App
     {
         $loader = new \Composer\Autoload\ClassLoader();
         $loader->add('libphonenumber', dirname(__FILE__) . '/../vendor/libphonenumber-for-php/src/');
+
+        $loader->addClassMap(array(
+            'OCA\\Encryption\\Crypt' => dirname(__FILE__) . '/../../files_encryption/lib/crypt.php'
+        ));
+
         $loader->register();
     }
 }

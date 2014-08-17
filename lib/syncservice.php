@@ -110,7 +110,7 @@ class SyncService
                 'type' => 'text/xml',
                 'content' => $xml,
             ));
-            $this->getApi()->doPostFile($postFields, $fileFields);
+            $this->getApi()->postFile($postFields, $fileFields);
 
         } catch (\Exception $e) {
             $this->logEntry->setStatus(LogEntry::STATUS_FAILED);
@@ -203,15 +203,10 @@ class SyncService
      */
     protected function getApi()
     {
-
-        /**
-         * @todo Immplement own API
-         * @todo Set fritzbox user from settings
-         */
-
-        return new \fritzbox_api(
+        return new FritzboxAPI(
+            $this->settingsService->getUrl(),
             $this->settingsService->getPassword(),
-            $this->settingsService->getUrl()
+            $this->settingsService->getUser()
         );
     }
 }
