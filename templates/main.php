@@ -41,20 +41,6 @@
 
     </div>
     <div id="app-content">
-        <!--
-        <div>
-            <h1>ToDos</h1>
-            <ul>
-                <li>Implement sync</li>
-                <hr>
-                <li>Display logfiles</li>
-                <li>Improce settings (HTTP(S), loginname, one number per entry, mobile label)</li>
-                <li>write own fritz box API.</li>
-                <li>Improve UI / ...</li>
-            </ul>
-        </div>
-        -->
-
         <table>
             <thead>
                 <tr>
