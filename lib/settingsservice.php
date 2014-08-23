@@ -124,6 +124,10 @@ class SettingsService
             $this->config->setAppValue($appName, 'addressbook', $settings['addressbook']);
         }
 
+        /* Remember the current user in order to run the cron as this user */
+        $userId = \OC::$session->get('user_id');
+        $this->config->setAppValue($appName, 'user_id', $userId);
+
         return true;
     }
 
@@ -219,8 +223,16 @@ class SettingsService
         $backendName = isset($parts[0]) ? $parts[0] : '';
         $addressBookId = isset($parts[1]) ? $parts[1] : '';
 
+        /* Perform the addressbook retrival as an admin. */
+        $origUserId = \OC::$session->get('user_id');
+        $userId = $this->config->getAppValue($this->appName, 'user_id');
+        \OC::$session->set('user_id', $userId);
+
         $contactsApp = new ContactsApp();
         $addressBook = $contactsApp->getAddressBook($backendName, $addressBookId);
+
+        /* Reset the original user. */
+        \OC::$session->set('user_id', $origUserId);
 
         return $addressBook;
     }
