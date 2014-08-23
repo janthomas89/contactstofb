@@ -3,8 +3,9 @@
 namespace OCA\ContactsToFb\Lib;
 
 use \OpenCloud\Common\Log\Logger;
+use \OCA\Contacts\Utils\JSONSerializer;
 use \libphonenumber\PhoneNumberUtil;
-use \libphonenumber\PhoneNumberType;
+use \libphonenumber\PhoneNumberFormat;
 
 /**
  * Service for syncing the contacts.
@@ -160,19 +161,25 @@ class SyncService
     {
         $xml = new AddressBookXML();
 
-        $contacts = \OCP\Contacts::search('', array('TEL'));
-        foreach ($contacts as $contact) {
-            foreach ($contact['TEL'] as $number) {
-                $isMobile = $this->isMobileNumber($number);
+        foreach ($this->addressBook->getChildren() as $contact) {
+            $data = JSONSerializer::serializeContact($contact);
+            $name = $data['metadata']['displayname'];
 
-                /**
-                 * @todo Improve home, mobile, etc.!
-                 */
+            if (!isset($data['data']['TEL'])) {
+                continue;
+            }
 
-                $type = $isMobile ? 'mobile' : 'home';
-                $name = $contact['FN'] . ($isMobile ? ' (mobile)' : '');
+            foreach ($data['data']['TEL'] as $tmpNumber) {
+                $number = $this->normalizeNumber($tmpNumber['value']);
 
-                $xml->writeContact($contact['id'], $name, $number, $type);
+                $type = null;
+                if (isset($tmpNumber['parameters']['TYPE'][0])) {
+                    $type = strtolower($tmpNumber['parameters']['TYPE'][0]);
+                }
+
+                $tmpName = $this->buildName($name, $type);
+
+                $xml->writeContact($contact['id'], $tmpName, $number, $type);
                 $this->logEntry->incSyncedItems();
             }
         }
@@ -181,23 +188,59 @@ class SyncService
     }
 
     /**
-     * Checks, if the given number is a mobile number.
+     * Normalizes a given phone number.
      *
-     * @param string $number
-     * @return boolean
+     * @param stringe $number
+     * @return string
      */
-    protected function isMobileNumber($number)
+    protected function normalizeNumber($number)
     {
         $phoneUtil = PhoneNumberUtil::getInstance();
         try {
             $numberInstance = $phoneUtil->parse($number, 'DE');
-            $type = $phoneUtil->getNumberType($numberInstance);
-            return PhoneNumberType::MOBILE === $type;
+            return $phoneUtil->format($numberInstance, PhoneNumberFormat::INTERNATIONAL);
         } catch (\libphonenumber\NumberParseException $e) {
             $this->logger->error($e->getMessage(), array('app' => $this->appName));
         }
 
-        return false;
+        return $number;
+    }
+
+    /**
+     * Generates a readable name from the original name and its number type.
+     *
+     * @param string $name
+     * @param string $type
+     * @return string
+     */
+    protected function buildName($name, $type)
+    {
+        $typeReadable = $type;
+        switch ($type) {
+            case 'cell':
+            case 'iphone':
+                $typeReadable = 'm';
+                break;
+
+            case 'fax':
+                $typeReadable = 'f';
+                break;
+
+            case 'work':
+                $typeReadable = 'w';
+                break;
+
+            case 'home':
+            case 'main':
+                $typeReadable = '';
+                break;
+        }
+
+        if ($typeReadable == '') {
+            return $name;
+        }
+
+        return $name . ' (' . $typeReadable . ')';
     }
 
     /**
