@@ -3,7 +3,8 @@
 namespace OCA\ContactsToFb\Lib;
 
 use \OCP\IConfig;
-use \OCA\Encryption\Crypt;
+use \OC\User\Session as UserSession;
+use \OCA\Files_Encryption\Crypt;
 use \OCA\Contacts\App as ContactsApp;
 
 /**
@@ -19,6 +20,11 @@ class SettingsService
      * @var IConfig
      */
     protected $config;
+
+    /**
+     * @var UserSession
+     */
+    protected $userSession;
 
     /**
      * @var string
@@ -54,9 +60,10 @@ class SettingsService
     protected $addressbook;
 
 
-    public function __construct(IConfig $config, $appName)
+    public function __construct(IConfig $config, UserSession $userSession, $appName)
     {
         $this->config = $config;
+        $this->userSession = $userSession;
         $this->appName = $appName;
 
         $this->load();
@@ -125,7 +132,7 @@ class SettingsService
         }
 
         /* Remember the current user in order to run the cron as this user */
-        $userId = \OC::$session->get('user_id');
+        $userId = $this->userSession->getSession()->get('user_id');
         $this->config->setAppValue($appName, 'user_id', $userId);
 
         return true;
@@ -224,15 +231,15 @@ class SettingsService
         $addressBookId = isset($parts[1]) ? $parts[1] : '';
 
         /* Perform the addressbook retrival as an admin. */
-        $origUserId = \OC::$session->get('user_id');
+        $origUserId = $this->userSession->getSession()->get('user_id');
         $userId = $this->config->getAppValue($this->appName, 'user_id');
-        \OC::$session->set('user_id', $userId);
+        $this->userSession->getSession()->set('user_id', $userId);
 
         $contactsApp = new ContactsApp();
         $addressBook = $contactsApp->getAddressBook($backendName, $addressBookId);
 
         /* Reset the original user. */
-        \OC::$session->set('user_id', $origUserId);
+        $this->userSession->getSession()->set('user_id', $origUserId);
 
         return $addressBook;
     }

@@ -42,6 +42,7 @@ class Application extends App
         $container->registerService('SettingsService', function($c) {
             return new SettingsService(
                 $c->query('ServerContainer')->getConfig(),
+                $c->query('ServerContainer')->getUserSession(),
                 $c->query('AppName')
             );
         });

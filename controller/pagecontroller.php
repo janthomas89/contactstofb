@@ -97,6 +97,8 @@ class PageController extends Controller
 
     /**
      * Synchronizes the contacts to FRITZ!Box.
+     *
+     * @UseSession
      */
     public function synchronize()
     {
