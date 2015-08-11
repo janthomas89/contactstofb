@@ -4,7 +4,7 @@ namespace OCA\ContactsToFb\Lib;
 
 use \OCP\IConfig;
 use \OC\User\Session as UserSession;
-use \OCA\Files_Encryption\Crypt;
+use \OCA\Encryption\Crypto\Crypt;
 use \OCA\Contacts\App as ContactsApp;
 
 /**
@@ -25,6 +25,11 @@ class SettingsService
      * @var UserSession
      */
     protected $userSession;
+
+    /**
+     * @var Crypt
+     */
+    protected $crypt;
 
     /**
      * @var string
@@ -60,10 +65,11 @@ class SettingsService
     protected $addressbook;
 
 
-    public function __construct(IConfig $config, UserSession $userSession, $appName)
+    public function __construct(IConfig $config, UserSession $userSession, Crypt $crypt, $appName)
     {
         $this->config = $config;
         $this->userSession = $userSession;
+        $this->crypt = $crypt;
         $this->appName = $appName;
 
         $this->load();
@@ -98,7 +104,7 @@ class SettingsService
         $password = '';
         $pwEnc = $this->config->getAppValue($appName, 'password');
         if ($pwEnc != '') {
-            $password = Crypt::symmetricDecryptFileContent($pwEnc, '');
+            $password = $this->crypt->symmetricDecryptFileContent($pwEnc, '');
         }
         $this->setPassword($password);
 
@@ -123,7 +129,7 @@ class SettingsService
         }
 
         if (isset($settings['password'])) {
-            $password = Crypt::symmetricEncryptFileContent($settings['password'], '');
+            $password = $this->crypt->symmetricEncryptFileContent($settings['password'], '');
             $this->config->setAppValue($appName, 'password', $password);
         }
 

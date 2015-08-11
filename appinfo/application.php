@@ -7,6 +7,7 @@ use \OCA\ContactsToFb\Controller\PageController;
 use \OCA\ContactsToFb\Lib\SettingsService;
 use \OCA\ContactsToFb\Lib\SyncService;
 use \OCA\ContactsToFb\Lib\LogService;
+use \OCA\Encryption\Crypto\Crypt;
 
 /**
  * The application definition.
@@ -39,10 +40,18 @@ class Application extends App
         });
 
         /* Other services ... */
+        $container->registerService('Crypt', function (IAppContainer $c) {
+            $server = $c->getServer();
+            return new Crypt($server->getLogger(),
+                $server->getUserSession(),
+                $server->getConfig()
+            );
+        });        
         $container->registerService('SettingsService', function($c) {
             return new SettingsService(
                 $c->query('ServerContainer')->getConfig(),
                 $c->query('ServerContainer')->getUserSession(),
+                $c->query('Crypt'),
                 $c->query('AppName')
             );
         });
