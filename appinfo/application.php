@@ -40,7 +40,7 @@ class Application extends App
         });
 
         /* Other services ... */
-        $container->registerService('Crypt', function (IAppContainer $c) {
+        $container->registerService('Crypt', function ($c) {
             $server = $c->getServer();
             return new Crypt($server->getLogger(),
                 $server->getUserSession(),
@@ -84,11 +84,8 @@ class Application extends App
     {
         $loader = new \Composer\Autoload\ClassLoader();
         $loader->add('libphonenumber', dirname(__FILE__) . '/../vendor/libphonenumber-for-php/src/');
-
-        $loader->addClassMap(array(
-            'OCA\\Encryption\\Crypt' => dirname(__FILE__) . '/../../files_encryption/lib/crypt.php'
-        ));
-
         $loader->register();
+
+        require_once(dirname(__FILE__) . '/../../encryption/lib/crypto/crypt.php');
     }
 }

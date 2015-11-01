@@ -2,7 +2,7 @@
 
 namespace OCA\ContactsToFb\Lib;
 
-use \OpenCloud\Common\Log\Logger;
+use \OC\Log;
 use \OCA\Contacts\Utils\JSONSerializer;
 use \libphonenumber\PhoneNumberUtil;
 use \libphonenumber\PhoneNumberFormat;
@@ -66,8 +66,8 @@ class SyncService
     public function __construct(
         SettingsService $settingsService,
         LogService $logService,
-        OC\Files\Node\Folder $appStorage,
-        Logger $logger,
+        \OC\Files\Node\Folder $appStorage,
+        Log $logger,
         $appName
     ) {
         $this->settingsService = $settingsService;
